@@ -1,5 +1,10 @@
 # Sổ Chi Tiêu
 
+Phiên bản web phục vụ đề tài hiện có bốn mục: **Tổng quan, Giao dịch, Danh mục
+và Báo cáo**. Giao diện dùng thanh điều hướng ngang và màu indigo, hỗ trợ
+desktop/điện thoại và chế độ tối. Xem
+[mô tả phiên bản giao diện](docs/software/design/finance-web-edition.md).
+
 > Tra cứu tài liệu theo nhóm tại [docs/README.md](docs/README.md).
 >
 > Hồ sơ AI-Augmented SDLC: xem [đánh giá tuân thủ](docs/governance/sdlc-compliance-audit.md),

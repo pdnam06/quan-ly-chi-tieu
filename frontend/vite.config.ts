@@ -19,9 +19,9 @@ export default defineConfig(({ mode }) => {
       manifest: {
         name: "Sổ Chi Tiêu",
         short_name: "Sổ Chi Tiêu",
-        description: "Quản lý thu chi, ngân sách và mục tiêu tài chính cá nhân.",
-        theme_color: "#003f46",
-        background_color: "#f5f8f7",
+        description: "Quản lý giao dịch, danh mục và báo cáo thu chi cá nhân.",
+        theme_color: "#5556cc",
+        background_color: "#f4f5fa",
         display: "standalone",
         orientation: "any",
         start_url: "/",

@@ -8,6 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import "./styles.css";
+import "./finance.css";
 
 if (!("__TAURI_INTERNALS__" in window)) {
   registerSW({ immediate: true });

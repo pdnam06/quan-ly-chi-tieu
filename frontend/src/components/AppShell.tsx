@@ -1,17 +1,5 @@
-import {
-  BarChart3,
-  Bot,
-  Grid2X2,
-  LogOut,
-  MoreHorizontal,
-  PiggyBank,
-  ReceiptText,
-  Tags,
-  Target,
-  UserRoundPen,
-  WalletCards,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { BarChart3, Grid2X2, LogOut, ReceiptText, Tags, Wallet, UserRoundPen } from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ProfileAvatar, ProfilePanel } from "./ProfilePanel";
@@ -20,38 +8,17 @@ const navItems = [
   { to: "/dashboard", label: "Tổng quan", icon: Grid2X2 },
   { to: "/transactions", label: "Giao dịch", icon: ReceiptText },
   { to: "/categories", label: "Danh mục", icon: Tags },
-  { to: "/budgets", label: "Ngân sách", icon: WalletCards },
-  { to: "/goals", label: "Mục tiêu", icon: Target },
   { to: "/reports", label: "Báo cáo", icon: BarChart3 },
-  { to: "/assistant", label: "Trợ lý AI", icon: Bot },
 ];
 
 export function AppShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const navRef = useRef<HTMLElement>(null);
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileLabel = user?.display_name?.trim() || user?.username || "Người dùng";
 
-  useEffect(() => {
-    navRef.current?.querySelector<HTMLElement>(".nav-item.is-active")?.scrollIntoView({
-      block: "nearest",
-      inline: "center",
-    });
-    setMobileMoreOpen(false);
-    setProfileOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (!mobileMoreOpen) return;
-    const closeOnEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMoreOpen(false);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [mobileMoreOpen]);
+  useEffect(() => { setProfileOpen(false); }, [location.pathname]);
 
   const handleLogout = () => {
     sessionStorage.setItem("auth_notice", "Bạn đã đăng xuất an toàn.");
@@ -60,66 +27,30 @@ export function AppShell() {
   };
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand__mark"><PiggyBank size={22} /></span>
-          <span>Sổ Chi Tiêu</span>
-        </div>
-
-        <nav ref={navRef} className="primary-nav" aria-label="Điều hướng chính">
+    <div className="app-shell finance-shell">
+      <header className="finance-topbar">
+        <NavLink to="/dashboard" className="finance-brand" aria-label="Sổ Chi Tiêu - Trang chủ">
+          <span className="finance-brand__mark"><Wallet size={23} /></span>
+          <span><strong>Sổ Chi Tiêu</strong><small>TÀI CHÍNH CÁ NHÂN</small></span>
+        </NavLink>
+        <nav className="finance-nav" aria-label="Điều hướng chính">
           {navItems.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}>
-              <Icon size={21} />
-              <span>{label}</span>
+            <NavLink key={to} to={to} className={({ isActive }) => `finance-nav__item${isActive ? " is-active" : ""}`}>
+              <Icon size={18} /><span>{label}</span>
             </NavLink>
           ))}
-          <button
-            className={`nav-item mobile-more-button${mobileMoreOpen ? " is-active" : ""}`}
-            type="button"
-            onClick={() => setMobileMoreOpen((open) => !open)}
-            aria-expanded={mobileMoreOpen}
-            aria-controls="mobile-more-menu"
-          >
-            <MoreHorizontal size={21} />
-            <span>Thêm</span>
-          </button>
         </nav>
-
-        {mobileMoreOpen && (
-          <>
-            <button className="mobile-more-scrim" type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Đóng menu thêm" />
-            <div id="mobile-more-menu" className="mobile-more-menu" role="menu" aria-label="Các trang khác">
-              {navItems.slice(2, 5).map(({ to, label, icon: Icon }) => (
-                <NavLink key={to} to={to} role="menuitem"><Icon size={19} /><span>{label}</span></NavLink>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className="sidebar__account">
-          <button className="account-card" type="button" onClick={() => setProfileOpen(true)} title="Chỉnh sửa thông tin cá nhân">
+        <div className="finance-account">
+          <button className="finance-profile" type="button" onClick={() => setProfileOpen(true)} title="Chỉnh sửa thông tin cá nhân">
             <ProfileAvatar avatarUrl={user?.avatar_url ?? null} label={profileLabel} />
-            <span className="account-copy">
-              <strong>{profileLabel}</strong>
-              <small>{user?.email}</small>
-            </span>
-            <UserRoundPen className="account-edit-icon" size={16} />
+            <span><strong>{profileLabel}</strong><small>Tài khoản cá nhân</small></span>
+            <UserRoundPen size={16} />
           </button>
-          <button type="button" className="logout-button" onClick={handleLogout}>
-            <LogOut size={20} />
-            <span>Đăng xuất</span>
-          </button>
+          <button className="icon-button" type="button" onClick={handleLogout} aria-label="Đăng xuất" title="Đăng xuất"><LogOut size={19} /></button>
         </div>
-        <div className="compact-account-actions">
-          <button type="button" className="compact-profile" onClick={() => setProfileOpen(true)} aria-label="Chỉnh sửa thông tin cá nhân" title="Thông tin cá nhân"><UserRoundPen size={20} /></button>
-          <button type="button" className="compact-logout" onClick={handleLogout} aria-label="Đăng xuất" title="Đăng xuất"><LogOut size={20} /></button>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <Outlet />
-      </main>
+      </header>
+      <main className="main-content finance-content"><Outlet /></main>
+      <footer className="finance-footer"><span>Sổ Chi Tiêu</span><span>Ghi chép hôm nay. Chủ động ngày mai.</span></footer>
       <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );

@@ -4,11 +4,8 @@ import { ProtectedRoute, PublicOnlyRoute } from "./auth/RouteGuards";
 import { AppShell } from "./components/AppShell";
 import { ConnectionStatus } from "./components/ConnectionStatus";
 import { AuthLayout } from "./components/auth/AuthLayout";
-import { BudgetsPage } from "./pages/BudgetsPage";
-import { AssistantPage } from "./pages/AssistantPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { GoalsPage } from "./pages/GoalsPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
@@ -36,10 +33,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/budgets" element={<BudgetsPage />} />
-            <Route path="/goals" element={<GoalsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/assistant" element={<AssistantPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

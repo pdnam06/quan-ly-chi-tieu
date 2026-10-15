@@ -2,14 +2,11 @@ import {
   AlertCircle,
   ArrowDownRight,
   ArrowRight,
-  Bot,
   CalendarDays,
   CircleDollarSign,
   Plus,
   ReceiptText,
   RefreshCw,
-  Sparkles,
-  Target,
   WalletCards,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -132,12 +129,6 @@ export function DashboardPage() {
   const incomePoints = useMemo(() => chartPoints(data?.trend ?? [], "income"), [data]);
   const expensePoints = useMemo(() => chartPoints(data?.trend ?? [], "expense"), [data]);
   const trendHasData = Boolean(data?.trend.some((point) => point.income > 0 || point.expense > 0));
-  const budgetPreview = useMemo(() => [...(data?.budgets ?? [])]
-    .sort((a, b) => {
-      const priority = { over: 0, warning: 1, safe: 2 };
-      return priority[a.status] - priority[b.status] || b.usage_percentage - a.usage_percentage;
-    })
-    .slice(0, 3), [data]);
 
   const retry = () => setReloadKey((value) => value + 1);
 
@@ -145,7 +136,7 @@ export function DashboardPage() {
     <div className="page dashboard-page">
       <header className="page-header">
         <div className="page-title-row">
-          <h1>Tổng quan</h1>
+          <div><span className="page-eyebrow">BỨC TRANH TÀI CHÍNH</span><h1>Tổng quan</h1><p>Theo dõi dòng tiền và những khoản chi của bạn.</p></div>
           <label className="month-input">
             <CalendarDays size={18} />
             <select
@@ -254,30 +245,6 @@ export function DashboardPage() {
           </section>
 
           <section className="dashboard-secondary-grid">
-            <article className="surface compact-surface">
-              <div className="section-heading"><h2>Ngân sách</h2><Link to="/budgets">Xem tất cả</Link></div>
-              {budgetPreview.length === 0 ? <PanelEmpty icon={WalletCards} title="Chưa đặt ngân sách" description="Đặt hạn mức để theo dõi tiến độ chi tiêu." compact /> : budgetPreview.map((budget) => {
-                const Icon = getCategoryIcon(budget.icon, "expense");
-                return (
-                  <div className={`mini-progress-row mini-progress-row--${budget.status}`} key={budget.id}>
-                    <span className="mini-progress-label" title={budget.category_name}><i style={{ color: budget.color, backgroundColor: `${budget.color}18` }}><Icon size={14} /></i>{budget.category_name}</span><strong>{Math.round(budget.usage_percentage)}%</strong>
-                    <div className="progress-track"><span style={{ width: `${Math.min(Math.max(budget.usage_percentage, 0), 100)}%` }} /></div>
-                  </div>
-                );
-              })}
-            </article>
-
-            <article className="surface compact-surface">
-              <div className="section-heading"><h2>Mục tiêu tiết kiệm</h2><Link to="/goals">Xem tất cả</Link></div>
-              {data.goals.length === 0 ? <PanelEmpty icon={Target} title="Chưa có mục tiêu" description="Mục tiêu tiết kiệm sẽ xuất hiện tại đây." compact /> : data.goals.map((goal) => (
-                <div className="goal-row" key={goal.id}>
-                  <span className="goal-symbol"><Target size={20} /></span>
-                  <div><strong title={goal.name}>{goal.name}</strong><small>{formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}</small><div className="progress-track"><span style={{ width: `${Math.min(Math.max(goal.progress_percentage, 0), 100)}%` }} /></div></div>
-                  <b>{Math.round(goal.progress_percentage)}%</b>
-                </div>
-              ))}
-            </article>
-
             <article className="surface compact-surface recent-surface">
               <div className="section-heading"><h2>Giao dịch gần đây</h2><Link to="/transactions">Xem tất cả</Link></div>
               {data.recent_transactions.length === 0 ? <PanelEmpty icon={ReceiptText} title="Chưa có giao dịch" description="Giao dịch trong tháng sẽ xuất hiện tại đây." compact /> : data.recent_transactions.map((transaction, index) => {
@@ -295,14 +262,12 @@ export function DashboardPage() {
               })}
             </article>
 
-            <article className="surface ai-surface">
-              <div className="section-heading"><h2><Sparkles size={19} /> Trợ lý AI</h2></div>
-              <div className="ai-insight">
-                <span><Bot size={24} /></span>
-                <strong>Hỏi Gemini về biến động chi tiêu, dòng tiền hoặc kế hoạch tài chính của bạn.</strong>
-                <small>Chỉ dùng dữ liệu tổng hợp đã ẩn danh · AI chỉ tư vấn</small>
-                <Link className="ai-insight__action" to="/assistant">Mở Trợ lý AI <ArrowRight size={16} /></Link>
-              </div>
+            <article className="surface finance-review">
+              <span className="page-eyebrow">NHÌN LẠI THÁNG NÀY</span>
+              <h2>Hiểu rõ từng khoản chi.</h2>
+              <p>So sánh thu nhập, chi tiêu và biến động theo danh mục để thấy tiền của bạn đang đi đâu.</p>
+              <div className="finance-review__value"><span>Tỷ lệ chi / thu</span><strong>{data.summary.income > 0 ? `${Math.round(data.summary.expense / data.summary.income * 100)}%` : "Chưa có thu nhập"}</strong></div>
+              <Link className="button button--primary" to="/reports">Xem báo cáo <ArrowRight size={17} /></Link>
             </article>
           </section>
         </>
@@ -338,7 +303,7 @@ function PanelEmpty({
   description,
   compact = false,
 }: {
-  icon: typeof Target;
+  icon: typeof ReceiptText;
   title: string;
   description: string;
   compact?: boolean;
@@ -358,7 +323,7 @@ function DashboardSkeleton() {
       <span className="sr-only">Đang tải dữ liệu Dashboard</span>
       <section className="metrics-grid">{Array.from({ length: 4 }, (_, index) => <div className="metric-card dashboard-skeleton" key={index} />)}</section>
       <section className="dashboard-primary-grid"><div className="surface dashboard-skeleton dashboard-skeleton--large" /><div className="surface dashboard-skeleton dashboard-skeleton--large" /></section>
-      <section className="dashboard-secondary-grid">{Array.from({ length: 4 }, (_, index) => <div className="surface dashboard-skeleton dashboard-skeleton--compact" key={index} />)}</section>
+      <section className="dashboard-secondary-grid">{Array.from({ length: 2 }, (_, index) => <div className="surface dashboard-skeleton dashboard-skeleton--compact" key={index} />)}</section>
     </div>
   );
 }

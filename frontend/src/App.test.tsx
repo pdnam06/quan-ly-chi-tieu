@@ -136,23 +136,29 @@ describe("application route smoke tests", () => {
     ["/dashboard", "Tổng quan"],
     ["/transactions", "Giao dịch"],
     ["/categories", "Danh mục"],
-    ["/budgets", "Ngân sách"],
-    ["/goals", "Mục tiêu"],
     ["/reports", "Báo cáo"],
-    ["/assistant", "Trợ lý AI"],
   ])("renders %s with successful API data", async (path, heading) => {
     renderApp(path);
     expect(await screen.findByRole("heading", { level: 1, name: heading })).toBeInTheDocument();
+  });
+
+  it.each(["/budgets", "/goals", "/assistant"])("redirects removed page %s to overview", async (path) => {
+    renderApp(path);
+    expect(await screen.findByRole("heading", { level: 1, name: "Tổng quan" })).toBeInTheDocument();
+    expect(api.listBudgets).not.toHaveBeenCalled();
+    expect(api.listGoals).not.toHaveBeenCalled();
+    expect(api.getAssistantContext).not.toHaveBeenCalled();
   });
 
   it("opens navigation/profile controls, saves profile and logs out", async () => {
     renderApp("/dashboard");
     await screen.findByRole("heading", { level: 1, name: "Tổng quan" });
 
-    await userEvent.click(screen.getByRole("button", { name: "Thêm" }));
-    expect(screen.getByRole("menu", { name: "Các trang khác" })).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("menu", { name: "Các trang khác" })).not.toBeInTheDocument();
+    const navigation = screen.getByRole("navigation", { name: "Điều hướng chính" });
+    expect(navigation.querySelectorAll("a")).toHaveLength(4);
+    expect(screen.queryByRole("link", { name: "Ngân sách" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Mục tiêu" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Trợ lý AI" })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getAllByTitle("Chỉnh sửa thông tin cá nhân")[0]);
     expect(await screen.findByRole("dialog", { name: "Thông tin cá nhân" })).toBeInTheDocument();
@@ -254,21 +260,7 @@ describe("application route smoke tests", () => {
     await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
   });
 
-  it("shows and retries budget load errors", async () => {
-    vi.mocked(api.listBudgets).mockRejectedValueOnce(new Error("budgets failed"));
-    renderApp("/budgets");
-    expect(await screen.findByRole("alert")).toHaveTextContent("budgets failed");
-    await userEvent.click(screen.getByRole("button", { name: /Thử lại/ }));
-    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
-  });
 
-  it("shows and retries goal load errors", async () => {
-    vi.mocked(api.listGoals).mockRejectedValueOnce(new Error("goals failed"));
-    renderApp("/goals");
-    expect(await screen.findByRole("alert")).toHaveTextContent("goals failed");
-    await userEvent.click(screen.getByRole("button", { name: /Thử lại/ }));
-    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
-  });
 
   it("shows and retries report load errors", async () => {
     vi.mocked(api.getReport).mockRejectedValueOnce(new Error("report failed"));
@@ -278,11 +270,4 @@ describe("application route smoke tests", () => {
     await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
   });
 
-  it("shows and retries assistant context errors", async () => {
-    vi.mocked(api.getAssistantContext).mockRejectedValueOnce(new Error("assistant failed"));
-    renderApp("/assistant");
-    expect(await screen.findByRole("alert")).toHaveTextContent("assistant failed");
-    await userEvent.click(screen.getByRole("button", { name: /Thử lại/ }));
-    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
-  });
 });
